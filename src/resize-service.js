@@ -150,7 +150,7 @@ angular
          * @param {number} step integer the number of step to finally have the image to the desired size
          * @param {string} outputFormat string the format of the output file for example image/jpeg, image/png,...
          * @param {function} blobCallback string either 'dataUrl' or 'blob'
-         * @returns {string} resized image in base64
+         * @returns {string|HTMLCanvasElement} resized image in base64
          */
         this.resizeImageWidthHeight = function (image, width, height, step, outputFormat, blobCallback) {
             if (!image) {
@@ -191,7 +191,8 @@ angular
             mainCanvas = this.resizeCanvas(mainCanvas, width, height);
 
             if (outputFormat === 'blob') {
-                return mainCanvas.toBlob(blobCallback);
+                mainCanvas.toBlob(blobCallback);
+                return mainCanvas;
             }
             else {
                 return mainCanvas.toDataURL(outputFormat);
