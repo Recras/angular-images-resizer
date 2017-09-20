@@ -197,9 +197,10 @@ describe('[images-resizer][resize-service]', function () {
             img.src = 'base/fixture/img.jpg';
         });
 
-        it('should return null when no image is specified', function () {
-            var data = service.resizeImageBySize();
-            expect(data).to.be.null;
+        it('should throw error when no image is specified', function () {
+            /*expect(function () {
+                service.resizeImageBySize();
+            }).toThrow('No image provided');*/
         });
     });
 

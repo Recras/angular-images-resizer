@@ -57,7 +57,7 @@ angular
          * @methodOf images-resizer.service:resizeService
          * @description
          * Resize a canvas according to the width and height
-         * @param {Object} cnv the canvas
+         * @param {Element} cnv the canvas
          * @param {number} width the final width to resize the canvas
          * @param {number} height the final height to resize the canvas
          * @returns {Object} return the resized canvas
@@ -83,7 +83,7 @@ angular
          * Resize an image with a given src attribute
          * @param {string} src string src attribute of an img element
          * @param {object} options json contain all options to resize an image (see all options available directly in th code below)
-         * @return {promise} when the work is done it return the image or an error :)
+         * @return {Promise} when the work is done it return the image or an error :)
          */
         this.resizeImage = function (src, options) {
             if (!isCanvasSupported) {
@@ -102,7 +102,7 @@ angular
                 sizeScale: options.sizeScale ? options.sizeScale : 'kb',
                 step: options.step ? options.step : 3,
                 outputFormat: options.outputFormat ? options.outputFormat : 'image/jpeg',
-                outputAs: options.outputAs ? options.outputAs : 'dataUrl',
+                blobCallback: options.blobCallback ? options.blobCallback : null,
                 crossOrigin: options.crossOrigin ? options.crossOrigin : null
             };
 
@@ -110,7 +110,7 @@ angular
                 .createImage(src, options.crossOrigin)
                 .then(function (img) {
                     if (options.height || options.width) {
-                        deferred.resolve(service.resizeImageWidthHeight(img, options.width, options.height, options.step, options.outputFormat, options.outputAs));
+                        deferred.resolve(service.resizeImageWidthHeight(img, options.width, options.height, options.step, options.outputFormat, options.blobCallback));
                     }
                     else if (options.size) {
                         //conversion of the size in bytes
@@ -127,7 +127,7 @@ angular
                                     break;
                             }
                         }
-                        deferred.resolve(service.resizeImageBySize(img, options.size, options.outputFormat, options.outputAs));
+                        deferred.resolve(service.resizeImageBySize(img, options.size, options.outputFormat, options.blobCallback));
                     }
                     else {
                         deferred.reject('Missing option to resize the image');
@@ -144,22 +144,24 @@ angular
          * @methodOf images-resizer.service:resizeService
          * @description
          * Resize image according to the width or the height or both
-         * @param {Object} image DomImage html image to resize
+         * @param {HTMLImageElement} image DomImage html image to resize
          * @param {number} width desired final image width
          * @param {number} height integer desired final image height
          * @param {number} step integer the number of step to finally have the image to the desired size
-         * @param {string} outputMime string the format of the output file for example image/jpeg, image/png,...
-         * @param {String} outputFormat string either 'dataUrl' or 'blob'
+         * @param {string} outputFormat string the format of the output file for example image/jpeg, image/png,...
+         * @param {function} blobCallback string either 'dataUrl' or 'blob'
          * @returns {string} resized image in base64
          */
-        this.resizeImageWidthHeight = function (image, width, height, step, outputMime, outputFormat) {
+        this.resizeImageWidthHeight = function (image, width, height, step, outputFormat, blobCallback) {
             if (!image) {
-                return null;
+                throw new Error('No image provided');
             }
-            if (!outputMime) {
-                outputMime = 'image/jpeg';
+            if (!outputFormat) {
+                outputFormat = 'image/jpeg';
             }
-            outputFormat = outputFormat && outputFormat.toLowerCase() === 'blob' ? 'blob' : 'dataurl';
+            if (outputFormat === 'blob' && typeof blobCallback !== 'function') {
+                throw new Error('No callback function provided');
+            }
 
             mainCanvas = $document[0].createElement('canvas');
 
@@ -189,10 +191,10 @@ angular
             mainCanvas = this.resizeCanvas(mainCanvas, width, height);
 
             if (outputFormat === 'blob') {
-                return mainCanvas.toBlob(outputMime);
+                return mainCanvas.toBlob(blobCallback);
             }
             else {
-                return mainCanvas.toDataURL(outputMime);
+                return mainCanvas.toDataURL(outputFormat);
             }
         };
 
@@ -202,20 +204,22 @@ angular
          * @methodOf images-resizer.service:resizeService
          * @description
          * Resize image to the approximately absolute size in octet
-         * @param {Object} image htmlImage the miage to resize
+         * @param {HTMLImageElement} image htmlImage the miage to resize
          * @param {number} targetSize number the final size in octet
-         * @param {string} outputMime string the format of the output file for example image/jpeg, image/png,...
-         * @param {string} outputFormat string either 'dataUrl' or 'blob'
+         * @param {string} outputFormat string the format of the output file for example image/jpeg, image/png,...
+         * @param {function} blobCallback string either 'dataUrl' or 'blob'
          * @returns {string} resize image in base64
          */
-        this.resizeImageBySize = function (image, targetSize, outputMime, outputFormat) {
+        this.resizeImageBySize = function (image, targetSize, outputFormat, blobCallback) {
             if (!image) {
-                return null;
+                throw new Error('No image provided');
             }
-            if (!outputMime) {
-                outputMime = 'image/jpeg';
+            if (!outputFormat) {
+                outputFormat = 'image/jpeg';
             }
-            outputFormat = outputFormat && outputFormat.toLowerCase() === 'blob' ? 'blob' : 'dataurl';
+            if (outputFormat === 'blob' && typeof blobCallback !== 'function') {
+                throw new Error('No callback function provided');
+            }
 
             mainCanvas = $document[0].createElement('canvas');
             mainCanvas.width = image.width;
@@ -224,14 +228,16 @@ angular
 
             var tmpResult;
             if (outputFormat === 'blob') {
-                tmpResult = mainCanvas.toBlob(outputMime);
+                mainCanvas.toBlob(function (blob) {
+                    tmpResult = blob;
+                });
             }
             else {
-                tmpResult = mainCanvas.toDataURL(outputMime);
+                tmpResult = mainCanvas.toDataURL(outputFormat);
             }
             var result = tmpResult;
 
-            var sizeOfTheImage = service.calulateImageSize(tmpResult, outputMime);
+            var sizeOfTheImage = service.calulateImageSize(tmpResult, outputFormat);
             var divideStrategy = Math.max(1, Math.min(sizeOfTheImage / targetSize, 200));
 
             var iteratorLimit = 20;
@@ -245,12 +251,15 @@ angular
                 var canvas = this.resizeCanvas(mainCanvas, newImageSize.width, newImageSize.height);
 
                 if (outputFormat === 'blob') {
-                    tmpResult = canvas.toBlob(outputMime);
+                    // eslint-disable-next-line no-loop-func
+                    canvas.toBlob(function (blob) {
+                        tmpResult = blob;
+                    });
                 }
                 else {
-                    tmpResult = canvas.toDataURL(outputMime);
+                    tmpResult = canvas.toDataURL(outputFormat);
                 }
-                var sizeOfTheImageTmp = service.calulateImageSize(tmpResult, outputMime);
+                var sizeOfTheImageTmp = service.calulateImageSize(tmpResult, outputFormat);
 
                 // If result is too far away from target, restart dividing with less agressive strategy.
                 if (sizeOfTheImageTmp / targetSize < 0.5 || sizeOfTheImageTmp === 0) {
