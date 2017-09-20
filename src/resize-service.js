@@ -102,6 +102,7 @@ angular
                 sizeScale: options.sizeScale ? options.sizeScale : 'kb',
                 step: options.step ? options.step : 3,
                 outputFormat: options.outputFormat ? options.outputFormat : 'image/jpeg',
+                outputAs: options.outputAs ? options.outputAs : 'dataUrl',
                 crossOrigin: options.crossOrigin ? options.crossOrigin : null
             };
 
@@ -109,7 +110,7 @@ angular
                 .createImage(src, options.crossOrigin)
                 .then(function (img) {
                     if (options.height || options.width) {
-                        deferred.resolve(service.resizeImageWidthHeight(img, options.width, options.height, options.step, options.outputFormat));
+                        deferred.resolve(service.resizeImageWidthHeight(img, options.width, options.height, options.step, options.outputFormat, options.outputAs));
                     }
                     else if (options.size) {
                         //conversion of the size in bytes
@@ -126,7 +127,7 @@ angular
                                     break;
                             }
                         }
-                        deferred.resolve(service.resizeImageBySize(img, options.size, options.outputFormat));
+                        deferred.resolve(service.resizeImageBySize(img, options.size, options.outputFormat, options.outputAs));
                     }
                     else {
                         deferred.reject('Missing option to resize the image');
@@ -147,16 +148,18 @@ angular
          * @param {number} width desired final image width
          * @param {number} height integer desired final image height
          * @param {number} step integer the number of step to finally have the image to the desired size
-         * @param {string} outputFormat string the format of the output file for example image/jpeg, image/png,...
+         * @param {string} outputMime string the format of the output file for example image/jpeg, image/png,...
+         * @param {String} outputFormat string either 'dataUrl' or 'blob'
          * @returns {string} resized image in base64
          */
-        this.resizeImageWidthHeight = function (image, width, height, step, outputFormat) {
+        this.resizeImageWidthHeight = function (image, width, height, step, outputMime, outputFormat) {
             if (!image) {
                 return null;
             }
-            if (!outputFormat) {
-                outputFormat = 'image/jpeg';
+            if (!outputMime) {
+                outputMime = 'image/jpeg';
             }
+            outputFormat = outputFormat.toLowerCase() === 'blob' ? 'blob' : 'dataurl';
 
             mainCanvas = $document[0].createElement('canvas');
 
@@ -185,7 +188,11 @@ angular
             }
             mainCanvas = this.resizeCanvas(mainCanvas, width, height);
 
-            return mainCanvas.toDataURL(outputFormat);
+            if (outputFormat === 'blob') {
+                return mainCanvas.toBlob(outputMime);
+            } else {
+                return mainCanvas.toDataURL(outputMime);
+            }
         };
 
         /**
@@ -196,26 +203,33 @@ angular
          * Resize image to the approximately absolute size in octet
          * @param {Object} image htmlImage the miage to resize
          * @param {number} targetSize number the final size in octet
-         * @param {string} outputFormat string the format of the output file for example image/jpeg, image/png,...
+         * @param {string} outputMime string the format of the output file for example image/jpeg, image/png,...
+         * @param {string} outputFormat string either 'dataUrl' or 'blob'
          * @returns {string} resize image in base64
          */
-        this.resizeImageBySize = function (image, targetSize, outputFormat) {
+        this.resizeImageBySize = function (image, targetSize, outputMime, outputFormat) {
             if (!image) {
                 return null;
             }
-            if (!outputFormat) {
-                outputFormat = 'image/jpeg';
+            if (!outputMime) {
+                outputMime = 'image/jpeg';
             }
+            outputFormat = outputFormat.toLowerCase() === 'blob' ? 'blob' : 'dataurl';
 
             mainCanvas = $document[0].createElement('canvas');
             mainCanvas.width = image.width;
             mainCanvas.height = image.height;
             mainCanvas.getContext('2d').drawImage(image, 0, 0, mainCanvas.width, mainCanvas.height);
 
-            var tmpResult = mainCanvas.toDataURL(outputFormat);
+            var tmpResult;
+            if (outputFormat === 'blob') {
+                tmpResult = mainCanvas.toBlob(outputMime);
+            } else {
+                tmpResult = mainCanvas.toDataURL(outputMime);
+            }
             var result = tmpResult;
 
-            var sizeOfTheImage = service.calulateImageSize(tmpResult, outputFormat);
+            var sizeOfTheImage = service.calulateImageSize(tmpResult, outputMime);
             var divideStrategy = Math.max(1, Math.min(sizeOfTheImage / targetSize, 200));
 
             var iteratorLimit = 20;
@@ -228,8 +242,12 @@ angular
                 };
                 var canvas = this.resizeCanvas(mainCanvas, newImageSize.width, newImageSize.height);
 
-                tmpResult = canvas.toDataURL(outputFormat);
-                var sizeOfTheImageTmp = service.calulateImageSize(tmpResult, outputFormat);
+                if (outputFormat === 'blob') {
+                    tmpResult = canvas.toBlob(outputMime);
+                } else {
+                    tmpResult = canvas.toDataURL(outputMime);
+                }
+                var sizeOfTheImageTmp = service.calulateImageSize(tmpResult, outputMime);
 
                 // If result is too far away from target, restart dividing with less agressive strategy.
                 if (sizeOfTheImageTmp / targetSize < 0.5 || sizeOfTheImageTmp === 0) {
