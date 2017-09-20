@@ -338,7 +338,7 @@ describe('[images-resizer][resize-service]', function () {
             var img = new Image();
             img.onload = function () {
                 var data = service.resizeImageWidthHeight(img, null, null, null, 'image/jpeg');
-                expect(service.calulateImageSize(data)).to.be.equal(58219);
+                expect(service.calulateImageSize(data)).to.be.equal(58218);
                 done();
             };
             img.src = 'base/fixture/img.png';

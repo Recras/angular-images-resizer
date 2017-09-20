@@ -159,7 +159,7 @@ angular
             if (!outputMime) {
                 outputMime = 'image/jpeg';
             }
-            outputFormat = outputFormat.toLowerCase() === 'blob' ? 'blob' : 'dataurl';
+            outputFormat = outputFormat && outputFormat.toLowerCase() === 'blob' ? 'blob' : 'dataurl';
 
             mainCanvas = $document[0].createElement('canvas');
 
@@ -190,7 +190,8 @@ angular
 
             if (outputFormat === 'blob') {
                 return mainCanvas.toBlob(outputMime);
-            } else {
+            }
+            else {
                 return mainCanvas.toDataURL(outputMime);
             }
         };
@@ -214,7 +215,7 @@ angular
             if (!outputMime) {
                 outputMime = 'image/jpeg';
             }
-            outputFormat = outputFormat.toLowerCase() === 'blob' ? 'blob' : 'dataurl';
+            outputFormat = outputFormat && outputFormat.toLowerCase() === 'blob' ? 'blob' : 'dataurl';
 
             mainCanvas = $document[0].createElement('canvas');
             mainCanvas.width = image.width;
@@ -224,7 +225,8 @@ angular
             var tmpResult;
             if (outputFormat === 'blob') {
                 tmpResult = mainCanvas.toBlob(outputMime);
-            } else {
+            }
+            else {
                 tmpResult = mainCanvas.toDataURL(outputMime);
             }
             var result = tmpResult;
@@ -244,7 +246,8 @@ angular
 
                 if (outputFormat === 'blob') {
                     tmpResult = canvas.toBlob(outputMime);
-                } else {
+                }
+                else {
                     tmpResult = canvas.toDataURL(outputMime);
                 }
                 var sizeOfTheImageTmp = service.calulateImageSize(tmpResult, outputMime);
@@ -282,6 +285,9 @@ angular
             switch (outputFormat) {
                 case 'image/jpg':
                     outputFormat = 'image/jpeg';
+                    break;
+                case 'image/png':
+                    outputFormat = 'image/png';
                     break;
                 default :
                     outputFormat = 'image/jpeg';
