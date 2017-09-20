@@ -36,7 +36,7 @@ angular.module('app', function ($document, $log, $scope, resizeService) {
   resizeService
     .resizeImage('resources/imageToResize', {
         size: 100, 
-        sizeScale: 'ko'
+        sizeScale: 'kb'
         // Other options ...
     })
     .then(function(image){    
@@ -59,8 +59,8 @@ The src can be an base 64image.
 ###### Options
 - height: desired height of the resized image
 - width: desired width of the resized image
-- size: desired size of the resized image (Size are by default in Octet)
-- sizeScale: 'o' || 'ko' || 'mo' || 'go'
+- size: desired size of the resized image (Size are by default in bytes)
+- sizeScale: 'b' || 'kb' || 'mb' || 'gb'
 - step: number of step to resize the image, by default 3. Bigger the number, better is the final image. Bigger the number, bigger the time to resize is.
 - outputFormat: specify the image type. Default value is 'image/jpeg'. [Check this page to see what format are supported.] (https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toDataURL)
 - crossOrigin: Specify the crossOrigin of the image to resize

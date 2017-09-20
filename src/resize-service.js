@@ -99,7 +99,7 @@ angular
                 height: options.height ? options.height : options.width ? null : options.size ? null : 1024,
                 width: options.width ? options.width : options.height ? null : options.size ? null : 1024,
                 size: options.size ? options.size : 500,
-                sizeScale: options.sizeScale ? options.sizeScale : 'ko',
+                sizeScale: options.sizeScale ? options.sizeScale : 'kb',
                 step: options.step ? options.step : 3,
                 outputFormat: options.outputFormat ? options.outputFormat : 'image/jpeg',
                 crossOrigin: options.crossOrigin ? options.crossOrigin : null
@@ -115,13 +115,13 @@ angular
                         //conversion of the size in bytes
                         if (angular.isString(options.sizeScale)) {
                             switch (options.sizeScale.toLowerCase()) {
-                                case 'ko':
+                                case 'kb':
                                     options.size *= 1024;
                                     break;
-                                case 'mo':
+                                case 'mb':
                                     options.size *= 1024 * 1024;
                                     break;
-                                case 'go':
+                                case 'gb':
                                     options.size *= 1024 * 1024 * 1024;
                                     break;
                             }
@@ -195,7 +195,7 @@ angular
          * @description
          * Resize image to the approximately absolute size in octet
          * @param {Object} image htmlImage the miage to resize
-         * @param {number} size number the final size in octet
+         * @param {number} targetSize number the final size in octet
          * @param {string} outputFormat string the format of the output file for example image/jpeg, image/png,...
          * @returns {string} resize image in base64
          */
@@ -262,11 +262,11 @@ angular
          */
         this.calulateImageSize = function (imgString, outputFormat) {
             switch (outputFormat) {
-                case 'image/jpeg':
-                    outputFormat = 'image/jpg';
+                case 'image/jpg':
+                    outputFormat = 'image/jpeg';
                     break;
                 default :
-                    outputFormat = 'image/jpg';
+                    outputFormat = 'image/jpeg';
                     break;
             }
             return Math.max(0, Math.round((imgString.length - ('data:' + outputFormat + ';base64,').length) * 3 / 4));

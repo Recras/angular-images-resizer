@@ -6,10 +6,10 @@
 
     function resizeToolBoxCtrl ($scope, $rootScope, $mdBottomSheet) {
         $scope.units = [
-            {value: 'o', label: 'Octet'},
-            {value: 'ko', label: 'KiloOctet'},
-            {value: 'mo', label: 'MegaOctet'},
-            {value: 'go', label: 'GigaOctect'}
+            {value: 'b', label: 'Bytes'},
+            {value: 'kb', label: 'Kilobytes'},
+            {value: 'mb', label: 'Megabytes'},
+            {value: 'gb', label: 'Gigabytes'}
         ];
 
         $scope.resize = function () {

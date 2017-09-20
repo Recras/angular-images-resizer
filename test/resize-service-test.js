@@ -246,10 +246,10 @@ describe('[images-resizer][resize-service]', function () {
             }, 500);
         });
 
-        it('should return a base64 img according to the size given in octet', function (done) {
+        it('should return a base64 img according to the size given in bytes', function (done) {
 
             service
-                .resizeImage('base/fixture/img.jpg', {size: 5000, sizeScale: 'o'})
+                .resizeImage('base/fixture/img.jpg', {size: 5000, sizeScale: 'b'})
                 .then(function (data) {
                     expect(data).to.be.not.null;
                     expect(data).to.contain('data:image/jpeg;base64');
@@ -267,11 +267,11 @@ describe('[images-resizer][resize-service]', function () {
             }, 500);
         });
 
-        it('should return a base64 img according to the size given in Ko', function (done) {
-            var sizeInKo = 5000 / 1024;
+        it('should return a base64 img according to the size given in KB', function (done) {
+            var sizeInKb = 5000 / 1024;
 
             service
-                .resizeImage('base/fixture/img.jpg', {size: sizeInKo, sizeScale: 'ko'})
+                .resizeImage('base/fixture/img.jpg', {size: sizeInKb, sizeScale: 'kb'})
                 .then(function (data) {
                     expect(data).to.be.not.null;
                     expect(data).to.contain('data:image/jpeg;base64');
@@ -289,10 +289,10 @@ describe('[images-resizer][resize-service]', function () {
             }, 500);
         });
 
-        it('should return a base64 img according to the size given in Mo', function (done) {
-            var sizeInMo = 5000 / (1024 * 1024);
+        it('should return a base64 img according to the size given in MB', function (done) {
+            var sizeInMb = 5000 / (1024 * 1024);
 
-            service.resizeImage('base/fixture/img.jpg', {size: sizeInMo, sizeScale: 'mo'})
+            service.resizeImage('base/fixture/img.jpg', {size: sizeInMb, sizeScale: 'mb'})
                 .then(function (data) {
                     expect(data).to.be.not.null;
                     expect(data).to.contain('data:image/jpeg;base64');
@@ -310,11 +310,11 @@ describe('[images-resizer][resize-service]', function () {
             }, 500);
         });
 
-        it('should return a base64 img according to the size given in Go', function (done) {
-            var sizeInGo = 5000 / (1024 * 1024 * 1024);
+        it('should return a base64 img according to the size given in GB', function (done) {
+            var sizeInGb = 5000 / (1024 * 1024 * 1024);
 
             service
-                .resizeImage('base/fixture/img.jpg', {size: sizeInGo, sizeScale: 'go'})
+                .resizeImage('base/fixture/img.jpg', {size: sizeInGb, sizeScale: 'gb'})
                 .then(function (data) {
                     expect(data).to.be.not.null;
                     expect(data).to.contain('data:image/jpeg;base64');
